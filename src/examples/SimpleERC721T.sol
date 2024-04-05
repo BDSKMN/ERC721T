@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ERC721T} from "src/ERC721T.sol";
 
-contract SampleERC721T is ERC721T {
+contract SimpleERC721T is ERC721T {
     error ArrayLengthsMismatch();
 
     constructor() ERC721T("Sample ERC721T", "S721T") {}
