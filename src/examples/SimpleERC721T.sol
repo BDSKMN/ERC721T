@@ -6,7 +6,7 @@ import {ERC721T} from "src/ERC721T.sol";
 contract SimpleERC721T is ERC721T {
     error ArrayLengthsMismatch();
 
-    constructor() ERC721T("Sample ERC721T", "S721T") {}
+    constructor() ERC721T("Simple ERC721T", "S721T") {}
 
     function getTierId(uint256 tokenId) public view returns (uint256) {
         if (!_exists(tokenId)) revert TokenDoesNotExist();
