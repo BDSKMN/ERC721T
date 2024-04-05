@@ -70,4 +70,72 @@ contract SimpleERC721TTest is Test {
         vm.expectRevert(ArrayLengthsMismatch.selector);
         simpleERC721T.batchBurn(receivers, mintedTokenIds);
     }
+
+    ///@dev 
+    function test_EmitTierURI() public {
+        vm.expectEmit();
+        emit TierURI("ipfs://bar",42);
+        // Sets Tier URI
+        simpleERC721T.setTierURI(42,"ipfs://bar");
+    }
+
+    function test_EmitTierMintedByMint() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        vm.expectEmit();
+        // Token ID starts from #0
+        emit TierMinted(0,1);
+        // Mint one token ID from existing tier ID
+        simpleERC721T.mint(address(this),1);
+    }
+
+    function test_EmitTierMintedByAirdrop() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        
+        // Three receiver addresses
+        address[] memory receivers = new address[](3);
+        receivers[0] = address(123);
+        receivers[1] = address(456);
+        receivers[2] = address(789);
+    
+        vm.expectEmit();
+        emit TierMinted(0,1);
+        emit TierMinted(1,1);
+        emit TierMinted(2,1);
+        simpleERC721T.airdrop(receivers,1);
+    }
+
+    function test_EmitTierBurned() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        simpleERC721T.mint(address(this), 1);
+
+        vm.expectEmit();
+        // Minted token ID #0
+        emit TierBurned(0,1);
+        // Burn token ID #0
+        simpleERC721T.burn(address(this), 0);
+    }
+
+    function test_EmitTierBurnedByBatchBurn() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        
+        // Three owner addresses
+        address[] memory owners = new address[](3);
+        owners[0] = address(123);
+        owners[1] = address(456);
+        owners[2] = address(789);
+        simpleERC721T.airdrop(owners,1);
+
+        uint256[] memory mintedTokenIds = new uint256[](3);
+        // Three minted token ID starts from #0
+        mintedTokenIds[0] = 0;
+        mintedTokenIds[1] = 1;
+        mintedTokenIds[2] = 2;
+
+        vm.expectEmit();
+        emit TierBurned(0,1);
+        emit TierBurned(1,1);
+        emit TierBurned(2,1);
+        // Batch burn three minted token IDs
+        simpleERC721T.batchBurn(owners,mintedTokenIds);
+    }
 }
