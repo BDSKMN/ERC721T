@@ -135,7 +135,51 @@ contract SimpleERC721TTest is Test {
         emit TierBurned(0,1);
         emit TierBurned(1,1);
         emit TierBurned(2,1);
-        // Batch burn three minted token IDs
+        // Batch burn 3 minted token IDs
         simpleERC721T.batchBurn(owners,mintedTokenIds);
+    }
+
+     ///@dev
+    function test_name() public view {
+        assertEq(simpleERC721T.name(), "ERC721T Example");
+    }
+
+    function test_symbol() public view {
+         assertEq(simpleERC721T.symbol(), "721TEx");
+    }
+
+    function test_getTierURI() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        assertEq(simpleERC721T.getTierURI(1),"ipfs://foo");
+    }
+
+    function test_getTierId() public {
+        simpleERC721T.setTierURI(69,"ipfs://foo");
+        simpleERC721T.mint(address(this), 69);
+        // Minted token ID #0
+        assertEq(simpleERC721T.getTierId(0), 69);
+    }
+
+    function test_tokenURI() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+       simpleERC721T.mint(address(this), 1);
+        // Minted token ID #0
+        assertEq(simpleERC721T.tokenURI(0),"ipfs://foo");
+    }
+
+    function test_totalSupplyAfterMint() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        simpleERC721T.mint(address(this), 1);
+        // Total supply plus 1
+        assertEq(simpleERC721T.totalSupply(), 1);
+    }
+
+    function test_totalSupplyAfterBurn() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        simpleERC721T.mint(address(this), 1);
+        // Minted token ID #0
+        simpleERC721T.burn(address(this), 0);
+        // Total supply back to 0
+        assertEq(simpleERC721T.totalSupply(), 0);
     }
 }
