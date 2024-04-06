@@ -93,11 +93,6 @@ contract SimpleERC721TTest is Test {
     }
 
     ///@dev Mint & airdrop functios
-    function test_MintNonExistentTierId() public {
-        vm.expectRevert(TierDoesNotExist.selector);
-        simpleERC721T.mint(address(this), 1);
-    }
-
     function test_Mint() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         vm.expectEmit();
@@ -105,7 +100,12 @@ contract SimpleERC721TTest is Test {
         emit TierMinted(0,1);
         simpleERC721T.mint(address(this),1);
     }
-    
+
+    function test_MintNonExistentTierId() public {
+        vm.expectRevert(TierDoesNotExist.selector);
+        simpleERC721T.mint(address(this), 1);
+    }
+
     function test_Airdrop() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         
@@ -149,7 +149,6 @@ contract SimpleERC721TTest is Test {
         vm.expectEmit();
         // Minted token ID #0
         emit TierBurned(0,1);
-        // Burn token ID #0
         simpleERC721T.burn(address(this), 0);
     }
 
@@ -173,7 +172,6 @@ contract SimpleERC721TTest is Test {
         emit TierBurned(0,1);
         emit TierBurned(1,1);
         emit TierBurned(2,1);
-        // Batch burn 3 minted token IDs
         simpleERC721T.batchBurn(owners,mintedTokenIds);
     }
 }
