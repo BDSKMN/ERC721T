@@ -21,38 +21,108 @@ contract SimpleERC721TTest is Test {
         simpleERC721T = new SimpleERC721T();
     }
 
-    ///@dev 
-    function test_ErrorTokenDoesNotExistByGetTierId() public {
-        vm.expectRevert(TokenDoesNotExist.selector);
-        // Get Tier ID from non-existent token ID
-        simpleERC721T.getTierId(0);
+    ///@dev Getter Functions
+    function test_Name() public view {
+        assertEq(simpleERC721T.name(),"Simple ERC721T");
     }
 
-    function test_ErrorTokenDoesNotExistByTokenURI() public {
+    function test_Symbol() public view {
+        assertEq(simpleERC721T.symbol(),"S721T");
+    }
+
+    function test_TokenURI() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        simpleERC721T.mint(address(this), 1);
+        // Minted token ID #0
+        assertEq(simpleERC721T.tokenURI(0),"ipfs://foo");
+    }
+
+    function test_TokenURINonExistentTokenId() public {
         vm.expectRevert(TokenDoesNotExist.selector);
-        // Get token URI from non-existent token ID
         simpleERC721T.tokenURI(0);
     }
 
-    function test_ErrorTierDoesNotExistByGetTierURI() public {
+    function test_GetTierId() public {
+        simpleERC721T.setTierURI(69,"ipfs://bar");
+        simpleERC721T.mint(address(this), 69);
+        // Minted token ID #0
+        assertEq(simpleERC721T.getTierId(0), 69);
+    }
+
+    function test_GetTierIdNonExistentTokenId() public {
+        vm.expectRevert(TokenDoesNotExist.selector);
+        simpleERC721T.getTierId(0);
+    }
+
+    function test_GetTierURI() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        assertEq(simpleERC721T.getTierURI(1),"ipfs://foo");
+    }
+
+    function test_GetTierURINonExistentTierURI() public {
         vm.expectRevert(TierDoesNotExist.selector);
-        // Call non-existent tier URI
         simpleERC721T.getTierURI(1);
     }
 
-    function test_ErrorTierDoesNotExistByMint() public {
-        vm.expectRevert(TierDoesNotExist.selector);
-        // Mint one token ID from non-exixtent tier ID
+    function test_TotalSupplyAfterMint() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
+        // Total supply plus 1
+        assertEq(simpleERC721T.totalSupply(), 1);
     }
 
-    function test_ErrorURICanNotBeEmpyString() public {
+    function test_TotalSupplyAfterBurn() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        simpleERC721T.mint(address(this), 1);
+        // Minted token ID #0
+        simpleERC721T.burn(address(this), 0);
+        // Total supply back to 0
+        assertEq(simpleERC721T.totalSupply(), 0);
+    }
+
+    ///@dev Setter function
+    function test_SetTierURI() public {
+        vm.expectEmit();
+        emit TierURI("ipfs://foo",1);
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+    }
+
+    function test_SetTierURIEmptyString() public {
         vm.expectRevert(URICanNotBeEmptyString.selector);
-        // Sets tier URI as an empty string
         simpleERC721T.setTierURI(1,"");
     }
 
-    function test_ErrorArrayLengthsMismatch() public {
+    ///@dev Mint & airdrop functios
+    function test_MintNonExistentTierId() public {
+        vm.expectRevert(TierDoesNotExist.selector);
+        simpleERC721T.mint(address(this), 1);
+    }
+
+    function test_Mint() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        vm.expectEmit();
+        // Token ID starts from #0
+        emit TierMinted(0,1);
+        simpleERC721T.mint(address(this),1);
+    }
+    
+    function test_Airdrop() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        
+        // Three receiver addresses
+        address[] memory receivers = new address[](3);
+        receivers[0] = address(123);
+        receivers[1] = address(456);
+        receivers[2] = address(789);
+    
+        vm.expectEmit();
+        emit TierMinted(0,1);
+        emit TierMinted(1,1);
+        emit TierMinted(2,1);
+        simpleERC721T.airdrop(receivers,1);
+    }
+
+    function test_AirdropArrayLengthsMismatch() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
 
         // Three receiver addresses
@@ -71,40 +141,8 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.batchBurn(receivers, mintedTokenIds);
     }
 
-    ///@dev 
-    function test_EmitTierURI() public {
-        vm.expectEmit();
-        emit TierURI("ipfs://bar",42);
-        // Sets Tier URI
-        simpleERC721T.setTierURI(42,"ipfs://bar");
-    }
-
-    function test_EmitTierMintedByMint() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-        vm.expectEmit();
-        // Token ID starts from #0
-        emit TierMinted(0,1);
-        // Mint one token ID from existing tier ID
-        simpleERC721T.mint(address(this),1);
-    }
-
-    function test_EmitTierMintedByAirdrop() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-        
-        // Three receiver addresses
-        address[] memory receivers = new address[](3);
-        receivers[0] = address(123);
-        receivers[1] = address(456);
-        receivers[2] = address(789);
-    
-        vm.expectEmit();
-        emit TierMinted(0,1);
-        emit TierMinted(1,1);
-        emit TierMinted(2,1);
-        simpleERC721T.airdrop(receivers,1);
-    }
-
-    function test_EmitTierBurned() public {
+    ///@dev Burn & batch burn functions
+    function test_Burn() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
 
@@ -115,7 +153,7 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.burn(address(this), 0);
     }
 
-    function test_EmitTierBurnedByBatchBurn() public {
+    function test_BatchBurn() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         
         // Three owner addresses
@@ -137,49 +175,5 @@ contract SimpleERC721TTest is Test {
         emit TierBurned(2,1);
         // Batch burn 3 minted token IDs
         simpleERC721T.batchBurn(owners,mintedTokenIds);
-    }
-
-     ///@dev
-    function test_name() public view {
-        assertEq(simpleERC721T.name(), "ERC721T Example");
-    }
-
-    function test_symbol() public view {
-         assertEq(simpleERC721T.symbol(), "721TEx");
-    }
-
-    function test_getTierURI() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-        assertEq(simpleERC721T.getTierURI(1),"ipfs://foo");
-    }
-
-    function test_getTierId() public {
-        simpleERC721T.setTierURI(69,"ipfs://foo");
-        simpleERC721T.mint(address(this), 69);
-        // Minted token ID #0
-        assertEq(simpleERC721T.getTierId(0), 69);
-    }
-
-    function test_tokenURI() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-       simpleERC721T.mint(address(this), 1);
-        // Minted token ID #0
-        assertEq(simpleERC721T.tokenURI(0),"ipfs://foo");
-    }
-
-    function test_totalSupplyAfterMint() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-        simpleERC721T.mint(address(this), 1);
-        // Total supply plus 1
-        assertEq(simpleERC721T.totalSupply(), 1);
-    }
-
-    function test_totalSupplyAfterBurn() public {
-        simpleERC721T.setTierURI(1,"ipfs://foo");
-        simpleERC721T.mint(address(this), 1);
-        // Minted token ID #0
-        simpleERC721T.burn(address(this), 0);
-        // Total supply back to 0
-        assertEq(simpleERC721T.totalSupply(), 0);
     }
 }
