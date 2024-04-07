@@ -3,13 +3,24 @@ pragma solidity ^0.8.4;
 
 import {ERC721} from "@solady/tokens/ERC721.sol";
 
+///@title ERC721T
+///@author kuwabatake.eth (0xkuwabatake)
+///@notice A contract extension to create a tier-based ERC721 NFT collection.
+
 abstract contract ERC721T is ERC721 {
+    /*//////////////////////////////////////////////////////////////
+                            CUSTOM ERRORS
+    //////////////////////////////////////////////////////////////*/
+
     /// @dev The tier ID does not exist.
     error TierDoesNotExist();
 
     /// @dev The URI can not be empty string.
     error URICanNotBeEmptyString();
 
+    /*//////////////////////////////////////////////////////////////
+                                EVENTS
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev Emitted when `tokenId` is minted and mapped to `tierId`.
     event TierMinted (uint256 indexed tokenId, uint256 indexed tierId);
@@ -20,6 +31,9 @@ abstract contract ERC721T is ERC721 {
     /// @dev Emitted when `tierURI` is set and mapped to `tier`.
     event TierURI (string tierURI, uint256 indexed tier);
 
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev The next token ID to be minted.
     uint256 private _currentIndex;
@@ -39,12 +53,19 @@ abstract contract ERC721T is ERC721 {
     /// @dev Mapping from tier ID to tier URI.
     mapping (uint256 => string) internal _tierURI;
 
+    /*//////////////////////////////////////////////////////////////
+                            CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
         _currentIndex = _startTokenId();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev Returns the token collection name.
     function name() public view virtual override returns (string memory) {
@@ -71,6 +92,10 @@ abstract contract ERC721T is ERC721 {
         }
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
     /// @dev Returns the starting token ID for sequential mints.
     function _startTokenId() internal view virtual returns (uint256) {
         return 0;
@@ -87,6 +112,8 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Mints single quantity of token ID  to `to` and map it to `tierid`.
+    /// @param to cannot be the zero address.
+    /// @param tierId must exist. It exists if the corresponding tier URI is not an empty string.
     function _mintTier(address to, uint256 tierId) internal virtual {
         if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();
         uint256 _tokenId = _nextTokenId();
@@ -100,6 +127,8 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Burns single quantity of `tokenId` from `owner` and unmap it from its tier ID.
+    /// @param owner is the owner of the existing `tokenId`.
+    /// @param tokenId must exist.
     function _burnTier(address owner, uint256 tokenId) internal virtual {
         uint256 tierId_ = _tierId[tokenId];
         delete _tierId[tokenId];
@@ -111,7 +140,9 @@ abstract contract ERC721T is ERC721 {
         emit TierBurned(tokenId, tierId_);
     }
 
-    /// @dev Sets 'tierURI' as the tier URI of 'tierId'.
+    /// @dev Sets 'tierURI' as the URI of 'tierId'.
+    /// @param tierId is an arbitrary uint256 number as tier ID.
+    /// @param tierURI MUST NOT be an empty string to differentiate it from non-existent tier URI.
     function _setTierURI(uint256 tierId, string memory tierURI) internal virtual {
         if (bytes(tierURI).length == 0) revert URICanNotBeEmptyString();
         _tierURI[tierId] = tierURI;
