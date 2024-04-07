@@ -3,10 +3,13 @@ pragma solidity ^0.8.4;
 
 import {ERC721} from "@solady/tokens/ERC721.sol";
 
-///@title ERC721T
-///@author kuwabatake.eth (0xkuwabatake)
-///@notice A contract extension to create a tier-based ERC721 NFT collection.
-
+/// @title ERC721T
+/// @author kuwabatake.eth (0xkuwabatake)
+/// @notice A contract extension to create a tier-based ERC721 NFT collection.
+/// @dev Note:
+/// - The contract is intended to be use as base contract by the implementation (child) contract.
+/// - tier ID existance is created by a non-empty string tier URI and it is needed to mint a new token ID.
+///   Please consider it carefully before overriding.
 abstract contract ERC721T is ERC721 {
     /*//////////////////////////////////////////////////////////////
                             CUSTOM ERRORS
