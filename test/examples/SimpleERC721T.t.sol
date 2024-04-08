@@ -9,6 +9,7 @@ contract SimpleERC721TTest is Test {
     SimpleERC721T public simpleERC721T;
 
     error TokenDoesNotExist();
+    error Unauthorized();
     error TierDoesNotExist();
     error URICanNotBeEmptyString();
     error ArrayLengthsMismatch();
@@ -92,6 +93,12 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.setTierURI(1,"");
     }
 
+    function test_RevertIf_SetTierURICallerIsNotOwner() public {
+        vm.prank(address(0));
+        vm.expectRevert(Unauthorized.selector);
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+    }
+
     ///@dev Mint & airdrop functios
     function test_ExpectEmitTierMintedBy_Mint() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
@@ -122,23 +129,18 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.airdrop(receivers,1);
     }
 
-    function test_RevertWhen_BatchBurnFrom_MismatchArrayLengthsOfArguments() public {
+    function test_RevertIf_AirdropCallerIsNotOwner() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
-
+        
         // Three receiver addresses
         address[] memory receivers = new address[](3);
         receivers[0] = address(123);
         receivers[1] = address(456);
         receivers[2] = address(789);
-        simpleERC721T.airdrop(receivers,1);
 
-        // Two minted token IDs
-        uint256[] memory mintedTokenIds = new uint256[](2);
-        mintedTokenIds[0] = 0;
-        mintedTokenIds[1] = 1;
-
-        vm.expectRevert(ArrayLengthsMismatch.selector);
-        simpleERC721T.batchBurn(receivers, mintedTokenIds);
+        vm.prank(address(0));
+        vm.expectRevert(Unauthorized.selector);
+        simpleERC721T.airdrop(receivers, 1);
     }
 
     ///@dev Burn & batch burn functions
@@ -173,5 +175,45 @@ contract SimpleERC721TTest is Test {
         emit TierBurned(1,1);
         emit TierBurned(2,1);
         simpleERC721T.batchBurn(owners,mintedTokenIds);
+    }
+
+    function test_RevertWhen_BatchBurnFrom_MismatchArrayLengthsOfArguments() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+
+        // Three receiver addresses
+        address[] memory receivers = new address[](3);
+        receivers[0] = address(123);
+        receivers[1] = address(456);
+        receivers[2] = address(789);
+        simpleERC721T.airdrop(receivers,1);
+
+        // Two minted token IDs
+        uint256[] memory mintedTokenIds = new uint256[](2);
+        mintedTokenIds[0] = 0;
+        mintedTokenIds[1] = 1;
+
+        vm.expectRevert(ArrayLengthsMismatch.selector);
+        simpleERC721T.batchBurn(receivers, mintedTokenIds);
+    }
+
+    function test_RevertIf_BatchBurnCallerIsNotOwner() public {
+        simpleERC721T.setTierURI(1,"ipfs://foo");
+        
+        // Three owner addresses
+        address[] memory owners = new address[](3);
+        owners[0] = address(123);
+        owners[1] = address(456);
+        owners[2] = address(789);
+        simpleERC721T.airdrop(owners,1);
+
+        uint256[] memory mintedTokenIds = new uint256[](3);
+        // Three minted token ID starts from #0
+        mintedTokenIds[0] = 0;
+        mintedTokenIds[1] = 1;
+        mintedTokenIds[2] = 2;
+
+        vm.prank(address(0));
+        vm.expectRevert(Unauthorized.selector);
+        simpleERC721T.batchBurn(owners, mintedTokenIds);
     }
 }
