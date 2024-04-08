@@ -22,56 +22,56 @@ contract SimpleERC721TTest is Test {
     }
 
     ///@dev Getter Functions
-    function test_Name() public view {
+    function test_GetValueFrom_Name() public view {
         assertEq(simpleERC721T.name(),"Simple ERC721T");
     }
 
-    function test_Symbol() public view {
+    function test_GetValueFrom_Symbol() public view {
         assertEq(simpleERC721T.symbol(),"S721T");
     }
 
-    function test_TokenURI() public {
+    function test_GetValueFrom_TokenURI() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
         // Minted token ID #0
         assertEq(simpleERC721T.tokenURI(0),"ipfs://foo");
     }
 
-    function test_TokenURINonExistentTokenId() public {
+    function test_RevertWhen_GetTokenURIFrom_NonExistentTokenId() public {
         vm.expectRevert(TokenDoesNotExist.selector);
         simpleERC721T.tokenURI(0);
     }
 
-    function test_GetTierId() public {
+    function test_GetValueFrom_GetTierId() public {
         simpleERC721T.setTierURI(69,"ipfs://bar");
         simpleERC721T.mint(address(this), 69);
         // Minted token ID #0
         assertEq(simpleERC721T.getTierId(0), 69);
     }
 
-    function test_GetTierIdNonExistentTokenId() public {
+    function test_RevertWhen_GetTierIdFrom_NonExistentTokenId() public {
         vm.expectRevert(TokenDoesNotExist.selector);
         simpleERC721T.getTierId(0);
     }
 
-    function test_GetTierURI() public {
+    function test_GetValueFrom_GetTierURI() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         assertEq(simpleERC721T.getTierURI(1),"ipfs://foo");
     }
 
-    function test_GetTierURINonExistentTierURI() public {
+    function test_RevertWhen_GetTierURIFrom_NonExistentTierURI() public {
         vm.expectRevert(TierDoesNotExist.selector);
         simpleERC721T.getTierURI(1);
     }
 
-    function test_TotalSupplyAfterMint() public {
+    function test_GetValueFrom_TotalSupplyAfter_Mint() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
         // Total supply plus 1
         assertEq(simpleERC721T.totalSupply(), 1);
     }
 
-    function test_TotalSupplyAfterBurn() public {
+    function test_GetValueFrom_TotalSupplyAfter_Burn() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
         // Minted token ID #0
@@ -81,19 +81,19 @@ contract SimpleERC721TTest is Test {
     }
 
     ///@dev Setter function
-    function test_SetTierURI() public {
+    function test_ExpectEmitTierURIBy_SetTierURI() public {
         vm.expectEmit();
         emit TierURI("ipfs://foo",1);
         simpleERC721T.setTierURI(1,"ipfs://foo");
     }
 
-    function test_SetTierURIEmptyString() public {
+    function test_RevertWhen_SetTierURIWith_EmptyString() public {
         vm.expectRevert(URICanNotBeEmptyString.selector);
         simpleERC721T.setTierURI(1,"");
     }
 
     ///@dev Mint & airdrop functios
-    function test_Mint() public {
+    function test_ExpectEmitTierMintedBy_Mint() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         vm.expectEmit();
         // Token ID starts from #0
@@ -101,12 +101,12 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.mint(address(this),1);
     }
 
-    function test_MintNonExistentTierId() public {
+    function test_RevertWhen_MintFrom_NonExistentTierId() public {
         vm.expectRevert(TierDoesNotExist.selector);
         simpleERC721T.mint(address(this), 1);
     }
 
-    function test_Airdrop() public {
+    function test_ExpectEmitTierMintedBy_AirdropThreeTokenIds() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         
         // Three receiver addresses
@@ -122,7 +122,7 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.airdrop(receivers,1);
     }
 
-    function test_AirdropArrayLengthsMismatch() public {
+    function test_RevertWhen_BatchBurnFrom_MismatchArrayLengthsOfArguments() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
 
         // Three receiver addresses
@@ -142,7 +142,7 @@ contract SimpleERC721TTest is Test {
     }
 
     ///@dev Burn & batch burn functions
-    function test_Burn() public {
+    function test_ExpectEmitTierBurnedBy_Burn() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         simpleERC721T.mint(address(this), 1);
 
@@ -152,7 +152,7 @@ contract SimpleERC721TTest is Test {
         simpleERC721T.burn(address(this), 0);
     }
 
-    function test_BatchBurn() public {
+    function test_ExpectEmitTierBurnedBy_BatchBurnThreeTokenIds() public {
         simpleERC721T.setTierURI(1,"ipfs://foo");
         
         // Three owner addresses
