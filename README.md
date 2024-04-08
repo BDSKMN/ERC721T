@@ -36,6 +36,6 @@ This is experimental software and is provided on an "as is" and "as available" b
 
 We do not give any warranties and will not be liable for any loss incurred through any use of this codebase.
 
-ERC721T has been [minimaly unit-tested](https://sepolia.basescan.org/address/0xe0d144bb99d62c3ba2eced59f1ab202a2f2ecb6b), there may be parts that exhibit unexpected emergent behavior when used with other code, or break in future Solidity versions.
+ERC721T has been [minimaly unit-tested](https://github.com/0xkuwabatake/ERC721T/blob/main/test/examples/SimpleERC721T.t.sol), there may be parts that exhibit unexpected emergent behavior when used with other code, or break in future Solidity versions.
 
 Please always include your own thorough tests when using ERC721T to make sure it works correctly with your code.
