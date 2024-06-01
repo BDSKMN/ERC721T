@@ -12,29 +12,6 @@ import {ERC721} from "@solady/tokens/ERC721.sol";
 ///   Please consider it carefully before overriding.
 abstract contract ERC721T is ERC721 {
     /*//////////////////////////////////////////////////////////////
-                            CUSTOM ERRORS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @dev The tier ID does not exist.
-    error TierDoesNotExist();
-
-    /// @dev The URI can not be empty string.
-    error URICanNotBeEmptyString();
-
-    /*//////////////////////////////////////////////////////////////
-                                EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @dev Emitted when `tokenId` is minted and mapped to `tierId`.
-    event TierMinted (uint256 indexed tokenId, uint256 indexed tierId);
-
-    /// @dev Emitted when `tokenId` is burned and unmapped from `tierId`.
-    event TierBurned (uint256 indexed tokenId, uint256 indexed tierId);
-
-    /// @dev Emitted when `tierURI` is set and mapped to `tier`.
-    event TierURI (string tierURI, uint256 indexed tier);
-
-    /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
 
@@ -55,6 +32,29 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Mapping from tier ID to tier URI.
     mapping (uint256 => string) internal _tierURI;
+
+    /*//////////////////////////////////////////////////////////////
+                                EVENTS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Emitted when `tokenId` is minted and mapped to `tierId`.
+    event TierMinted (uint256 indexed tokenId, uint256 indexed tierId);
+
+    /// @dev Emitted when `tokenId` is burned and unmapped from `tierId`.
+    event TierBurned (uint256 indexed tokenId, uint256 indexed tierId);
+
+    /// @dev Emitted when `tierURI` is set and mapped to `tier`.
+    event TierURI (string tierURI, uint256 indexed tier);
+
+    /*//////////////////////////////////////////////////////////////
+                            CUSTOM ERRORS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev The tier ID does not exist.
+    error TierDoesNotExist();
+
+    /// @dev The URI can not be empty string.
+    error URICanNotBeEmptyString();
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
