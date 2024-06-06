@@ -11,16 +11,6 @@ contract SimpleERC721T is ERC721T, Ownable {
         _initializeOwner(msg.sender);
     }
 
-    function getTierId(uint256 tokenId) public view returns (uint256) {
-        if (!_exists(tokenId)) revert TokenDoesNotExist();
-        return _tierId[tokenId];
-    }
-
-    function getTierURI(uint256 tierId) public view returns (string memory) {
-        if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();
-        return _tierURI[tierId];
-    }
-
     function mint(address to, uint256 tierId) public {
         _mintTier(to, tierId);
     }
