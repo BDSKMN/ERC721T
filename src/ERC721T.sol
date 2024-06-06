@@ -96,19 +96,19 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Returns tier ID from `tokenId`.
     function getTierId(uint256 tokenId) public view returns (uint256) {
-        if (!_exists(tokenId)) revert TokenDoesNotExist();
+        if (!_exists(tokenId)) _revert(TokenDoesNotExist.selector);
         return _tierId[tokenId];
     }
 
     /// @dev Returns tier URI from `tierId`.
     function getTierURI(uint256 tierId) public view returns (string memory) {
-        if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();
+        if (bytes(_tierURI[tierId]).length == 0) _revert(TierDoesNotExist.selector);
         return _tierURI[tierId];
     }
 
     /// @dev See {ERC721 - tokenURI}.
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        if (!_exists(tokenId)) revert TokenDoesNotExist();
+        if (!_exists(tokenId)) _revert(TokenDoesNotExist.selector);
         uint256 tierId = _tierId[tokenId];
         string memory tierURI = _tierURI[tierId];
         return tierURI;
@@ -144,7 +144,7 @@ abstract contract ERC721T is ERC721 {
     /// @param to cannot be the zero address.
     /// @param tierId must exist. It exists if the corresponding tier URI is not an empty string.
     function _mintTier(address to, uint256 tierId) internal virtual {
-        if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();
+        if (bytes(_tierURI[tierId]).length == 0) _revert(TierDoesNotExist.selector);
         uint256 _tokenId = _nextTokenId();
         _tierId[_tokenId] = tierId;
         unchecked {
@@ -173,9 +173,17 @@ abstract contract ERC721T is ERC721 {
     /// @param tierId is an arbitrary uint256 value as tier ID.
     /// @param tierURI MUST NOT an empty string to differentiate it from non-existent tier URI.
     function _setTierURI(uint256 tierId, string memory tierURI) internal virtual {
-        if (bytes(tierURI).length == 0) revert URICanNotBeEmptyString();
+        if (bytes(tierURI).length == 0) _revert(URICanNotBeEmptyString.selector);
         _tierURI[tierId] = tierURI;
 
         emit TierURI(tierURI, tierId);
+    }
+
+    /// @dev For more efficient reverts.
+    function _revert(bytes4 errorSelector) internal pure {
+        assembly {
+            mstore(0x00, errorSelector)
+            revert(0x00, 0x04)
+        }
     }
 }
