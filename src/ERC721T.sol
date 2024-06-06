@@ -7,9 +7,23 @@ import {ERC721} from "@solady/tokens/ERC721.sol";
 /// @author kuwabatake.eth (0xkuwabatake)
 /// @notice A contract extension to create a tier-based ERC721 NFT collection.
 /// @dev Note:
-/// - The contract is intended to be use as base contract by the implementation (child) contract.
-/// - tier ID existance is created by a non-empty string tier URI and it is needed to mint a new token ID.
-///   Please consider it carefully before overriding.
+/// - The contract is an abstract contract that inherit to Simple ERC721 implementation by Solady
+///   (https://github.com/vectorized/solady/blob/main/src/tokens/ERC721.sol).
+/// - The contract is intended to be used as base contract by child (implementation) contract.
+/// - Token IDs are minted in sequential order (e.g. 0, 1, 2, 3, ...) starting from `_startTokenId()`,
+///   but this extension DOES NOT provide the batch creation of token IDs.
+/// - Tier ID is a generic unique identifier to map some minted token IDs to return sama token URI value.
+///   This identifier is created when a child contract call `_setTierURI` method, with two parameters:
+///   - `tierId` is an arbitrary uint256 value. If not exist, it will create a new tier ID. If exist,
+///      the intention is to change the existing `tierURI` corresponds to `tierId`.
+///   - `tierURI` MUST NOT an empty string to differentiate it from non-existent tier URI. 
+///      This implementation won't check if the URI follows the ERC721 Metadata JSON schema or not, 
+///      responsibility is delegated to the caller.
+///
+/// If you are overriding:
+/// - MAKE SURE to not violate the creation of non-empty string tier URI before token ID creation.
+///   It can be achieved by NOT REMOVING `if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();`
+///   checker before call _mint(to, tokenId) from ERC721 contract.
 abstract contract ERC721T is ERC721 {
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -156,8 +170,8 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Sets 'tierURI' as the URI of 'tierId'.
-    /// @param tierId is an arbitrary uint256 number as tier ID.
-    /// @param tierURI MUST NOT be an empty string to differentiate it from non-existent tier URI.
+    /// @param tierId is an arbitrary uint256 value as tier ID.
+    /// @param tierURI MUST NOT an empty string to differentiate it from non-existent tier URI.
     function _setTierURI(uint256 tierId, string memory tierURI) internal virtual {
         if (bytes(tierURI).length == 0) revert URICanNotBeEmptyString();
         _tierURI[tierId] = tierURI;
