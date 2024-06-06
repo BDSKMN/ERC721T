@@ -4,18 +4,18 @@ pragma solidity ^0.8.4;
 import {ERC721} from "@solady/tokens/ERC721.sol";
 
 /// @title ERC721T
-/// @author kuwabatake.eth (0xkuwabatake)
+/// @author 0xkuwabatake
 /// @notice A contract extension to create a tier-based ERC721 NFT collection.
 /// @dev Note:
 /// - The contract is an abstract contract that inherit to Simple ERC721 implementation by Solady
 ///   (https://github.com/vectorized/solady/blob/main/src/tokens/ERC721.sol).
 /// - The contract is intended to be used as base contract by child (implementation) contract.
 /// - Token IDs are minted in sequential order (e.g. 0, 1, 2, 3, ...) starting from `_startTokenId()`,
-///   but this extension DOES NOT provide the batch creation of token IDs.
-/// - Tier ID is a generic unique identifier to map some minted token IDs to return sama token URI value.
-///   This identifier is created when a child contract call `_setTierURI` method, with two parameters:
+///   but this extension DOES NOT provide the batch creation of token IDs mechanism.
+/// - Tier ID is a generic identifier to map some minted token IDs to return similar token URI value.
+///   This identifier is created when a child contract call `_setTierURI` method, with its parameters:
 ///   - `tierId` is an arbitrary uint256 value. If not exist, it will create a new tier ID. If exist,
-///      the intention is to change the existing `tierURI` corresponds to `tierId`.
+///      the intention is to change the existing `tierURI` corresponds to its `tierId`.
 ///   - `tierURI` MUST NOT an empty string to differentiate it from non-existent tier URI. 
 ///      This implementation won't check if the URI follows the ERC721 Metadata JSON schema or not, 
 ///      responsibility is delegated to the caller.
