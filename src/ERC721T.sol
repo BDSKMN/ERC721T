@@ -95,13 +95,13 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Returns tier ID from `tokenId`.
-    function getTierId(uint256 tokenId) public view returns (uint256) {
+    function getTierId(uint256 tokenId) public view virtual returns (uint256) {
         if (!_exists(tokenId)) _revert(TokenDoesNotExist.selector);
         return _tierId[tokenId];
     }
 
     /// @dev Returns tier URI from `tierId`.
-    function getTierURI(uint256 tierId) public view returns (string memory) {
+    function getTierURI(uint256 tierId) public view virtual returns (string memory) {
         if (bytes(_tierURI[tierId]).length == 0) _revert(TierDoesNotExist.selector);
         return _tierURI[tierId];
     }
