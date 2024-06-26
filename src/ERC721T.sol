@@ -125,21 +125,6 @@ abstract contract ERC721T is ERC721 {
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Returns the starting token ID for sequential mints.
-    function _startTokenId() internal view virtual returns (uint256) {
-        return 0;
-    }
-
-    /// @dev Returns the next token ID to be minted.
-    function _nextTokenId() internal view virtual returns (uint256) {
-        return _currentIndex;
-    }
-
-    /// @dev Returns the total number of tokens burned.
-    function _totalBurned() internal view virtual returns (uint256) {
-        return _burnCounter;
-    }
-
     /// @dev Mints single quantity of token ID  to `to` and map it to `tierid`.
     /// @param to cannot be the zero address.
     /// @param tierId must exist. It exists if the corresponding tier URI is not an empty string.
@@ -177,6 +162,21 @@ abstract contract ERC721T is ERC721 {
         _tierURI[tierId] = tierURI;
 
         emit TierURI(tierURI, tierId);
+    }
+
+    /// @dev Returns the starting token ID for sequential mints.
+    function _startTokenId() internal view virtual returns (uint256) {
+        return 0;
+    }
+
+    /// @dev Returns the next token ID to be minted.
+    function _nextTokenId() internal view virtual returns (uint256) {
+        return _currentIndex;
+    }
+
+    /// @dev Returns the total number of tokens burned.
+    function _totalBurned() internal view virtual returns (uint256) {
+        return _burnCounter;
     }
 
     /// @dev For more efficient reverts.
