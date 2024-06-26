@@ -140,16 +140,29 @@ abstract contract ERC721T is ERC721 {
         emit TierMinted(_tokenId, tierId);
     }
 
-    /// @dev Burns single quantity of `tokenId` from `owner` and unmap it from its tier ID.
-    /// @param owner is the owner of the existing `tokenId`.
+    /// @dev Burns single quantity of `tokenId` and unmap it from its tier ID.
     /// @param tokenId must exist.
-    function _burnTier(address owner, uint256 tokenId) internal virtual {
+    function _burnTier(uint256 tokenId) internal virtual {
         uint256 tierId_ = _tierId[tokenId];
         delete _tierId[tokenId];
         unchecked {
             ++_burnCounter;
         }
-        _burn(owner, tokenId);
+        _burn(tokenId);
+
+        emit TierBurned(tokenId, tierId_);
+    }
+
+    /// @dev Burns single quantity of `tokenId` by `by` and unmap it from its tier ID.
+    /// @param by is the owner of the existing `tokenId` or approved operator.
+    /// @param tokenId must exist.
+    function _burnTier(address by, uint256 tokenId) internal virtual {
+        uint256 tierId_ = _tierId[tokenId];
+        delete _tierId[tokenId];
+        unchecked {
+            ++_burnCounter;
+        }
+        _burn(by, tokenId);
 
         emit TierBurned(tokenId, tierId_);
     }
