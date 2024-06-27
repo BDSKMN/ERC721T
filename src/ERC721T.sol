@@ -58,7 +58,7 @@ abstract contract ERC721T is ERC721 {
     event TierBurned (uint256 indexed tokenId, uint256 indexed tierId);
 
     /// @dev Emitted when `tierURI` is set and mapped to `tier`.
-    event TierURI (string tierURI, uint256 indexed tier);
+    event TierURI (uint256 indexed tier, string tierURI);
 
     /*//////////////////////////////////////////////////////////////
                             CUSTOM ERRORS
@@ -174,7 +174,7 @@ abstract contract ERC721T is ERC721 {
         if (bytes(tierURI).length == 0) _revert(URICanNotBeEmptyString.selector);
         _tierURI[tierId] = tierURI;
 
-        emit TierURI(tierURI, tierId);
+        emit TierURI(tierId, tierURI);
     }
 
     /// @dev Returns the starting token ID for sequential mints.

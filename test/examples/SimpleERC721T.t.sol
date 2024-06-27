@@ -16,7 +16,7 @@ contract SimpleERC721TTest is Test {
 
     event TierMinted (uint256 indexed tokenId, uint256 indexed tierId);
     event TierBurned (uint256 indexed tokenId, uint256 indexed tierId);
-    event TierURI (string tierURI, uint256 indexed tier);
+    event TierURI (uint256 indexed tier, string tierURI);
 
     function setUp() external {
         simpleERC721T = new SimpleERC721T();
@@ -84,7 +84,7 @@ contract SimpleERC721TTest is Test {
     ///@dev Setter function
     function test_ExpectEmitTierURIBy_SetTierURI() public {
         vm.expectEmit();
-        emit TierURI("ipfs://foo",1);
+        emit TierURI(1,"ipfs://foo");
         simpleERC721T.setTierURI(1,"ipfs://foo");
     }
 
