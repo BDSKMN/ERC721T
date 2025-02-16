@@ -25,9 +25,9 @@ contract SampleERC721T is ERC721T, Ownable {
         _batchSafeMintTier(to, tierId, quantity);
     }
 
-    function airdropTier(address[] calldata receivers, uint56 tierId) public onlyOwner {
-        for (uint256 i = 0; i < receivers.length;) {
-            _mintTier(receivers[i], tierId);
+    function airdropTier(address[] calldata recipients, uint56 tierId) public onlyOwner {
+        for (uint256 i = 0; i < recipients.length;) {
+            _mintTier(recipients[i], tierId);
             unchecked { ++i; }   
         }
     }
