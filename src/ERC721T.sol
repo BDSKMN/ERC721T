@@ -112,17 +112,17 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Returns the tier ID associated with a token.
     function tierId(uint256 tokenId) public view returns (uint56) {
-        return _toUint56FromUint96(_getExtraData(tokenId));
+        return uint56(_getExtraData(tokenId));
     }
 
     /// @dev Returns the timestamp when the token was minted.
     function mintTimestamp(uint256 tokenId) public view returns (uint40) {
-        return _toUint40FromUint96(_getExtraData(tokenId) >> _BITPOS_TIER_ID);
+        return uint40(_getExtraData(tokenId) >> _BITPOS_TIER_ID);
     }
 
     /// @dev Returns the number of tokens minted by an address.
     function numberMinted(address addr) public view returns (uint32) {
-        return _toUint32FromUint224(_getAux(addr));
+        return uint32(_getAux(addr));
     }
 
     /// @dev Returns the total supply of tokens in circulation.
@@ -157,7 +157,7 @@ abstract contract ERC721T is ERC721 {
             unchecked { ++i; }
         }
 
-        emit BatchTierSet(startTokenId, endTokenId, tier, _toUint40FromUint256(block.timestamp));
+        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints multiple tokens with the same tier in a single batch.
@@ -181,7 +181,7 @@ abstract contract ERC721T is ERC721 {
             unchecked { ++i; }
         }
 
-        emit BatchTierSet(startTokenId, endTokenId, tier, _toUint40FromUint256(block.timestamp));
+        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Mints a token and assigns it a tier.
@@ -190,7 +190,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++tokenId; }
         _mint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, _toUint40FromUint256(block.timestamp));
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints a token and assigns it a tier.
@@ -199,7 +199,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++tokenId; }
         _safeMint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, _toUint40FromUint256(block.timestamp));
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Burns a token and resets its tier data.
@@ -283,33 +283,5 @@ abstract contract ERC721T is ERC721 {
             mstore(0x00, s)
             revert(0x1c, 0x04)
         }
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            PRIVATE FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @dev Safely casts `x` to uint32. Reverts on overflow.
-    function _toUint32FromUint224(uint224 x) private pure returns (uint32) {
-        if (x >= 1 << 32) _rv(uint32(Overflow.selector));
-        return uint32(x);
-    }
-
-    /// @dev Safely casts `x` to uint40. Reverts on overflow.
-    function _toUint40FromUint96(uint96 x) private pure returns (uint40) {
-        if (x >= 1 << 40) _rv(uint32(Overflow.selector));
-        return uint40(x);
-    }
-
-    /// @dev Safely casts `x` to uint40. Reverts on overflow.
-    function _toUint40FromUint256(uint256 x) private pure returns (uint40) {
-        if (x >= 1 << 40) _rv(uint32(Overflow.selector));
-        return uint40(x);
-    }
-
-    /// @dev Safely casts `x` to uint56. Reverts on overflow.
-    function _toUint56FromUint96(uint96 x) private pure returns (uint56) {
-        if (x >= 1 << 56) _rv(uint32(Overflow.selector));
-        return uint56(x);
     }
 }
