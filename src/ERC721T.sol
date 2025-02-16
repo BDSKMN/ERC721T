@@ -136,13 +136,31 @@ abstract contract ERC721T is ERC721 {
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev Mints a token and assigns it a tier.
+    function _mintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
+        uint256 tokenId = _nextTokenId();
+        unchecked { ++_currentIndex; }
+        _mint(to, tokenId);
+        _setMintExtraData(tokenId, tier);
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
+    }
+
+    /// @dev Safely mints a token and assigns it a tier.
+    function _safeMintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
+        uint256 tokenId = _nextTokenId();
+        unchecked { ++_currentIndex; }
+        _safeMint(to, tokenId);
+        _setMintExtraData(tokenId, tier);
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
+    }
+
     /// @dev Mints multiple tokens with the same tier in a single batch.
     function _batchMintTier(
         address to,
         uint56 tier,
         uint256 quantity
     ) internal OnlyValidTier(tier) {
-        uint256 startTokenId = _currentIndex;  
+        uint256 startTokenId = _nextTokenId();  
         uint256 endTokenId = startTokenId + quantity;
 
         unchecked { _currentIndex += quantity; }
@@ -166,7 +184,7 @@ abstract contract ERC721T is ERC721 {
         uint56 tier,
         uint256 quantity
     ) internal OnlyValidTier(tier) {
-        uint256 startTokenId = _currentIndex;  
+        uint256 startTokenId = _nextTokenId();  
         uint256 endTokenId = startTokenId + quantity;
 
         unchecked { _currentIndex += quantity; }
@@ -182,24 +200,6 @@ abstract contract ERC721T is ERC721 {
         }
 
         emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
-    }
-
-    /// @dev Mints a token and assigns it a tier.
-    function _mintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
-        uint256 tokenId = _currentIndex;
-        unchecked { ++tokenId; }
-        _mint(to, tokenId);
-        _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, uint40(block.timestamp));
-    }
-
-    /// @dev Safely mints a token and assigns it a tier.
-    function _safeMintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
-        uint256 tokenId = _currentIndex;
-        unchecked { ++tokenId; }
-        _safeMint(to, tokenId);
-        _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Burns a token and resets its tier data.
