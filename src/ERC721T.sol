@@ -120,11 +120,6 @@ abstract contract ERC721T is ERC721 {
         return uint40(_getExtraData(tokenId) >> _BITPOS_TIER_ID);
     }
 
-    /// @dev Returns the number of tokens minted by an address.
-    function numberMinted(address addr) public view returns (uint32) {
-        return uint32(_getAux(addr));
-    }
-
     /// @dev Returns the total supply of tokens in circulation.
     function totalSupply() public view returns (uint256) {
         unchecked {
@@ -229,11 +224,6 @@ abstract contract ERC721T is ERC721 {
         _setExtraData(tokenId, 0);
     }
 
-    /// @dev Sets the number of tokens minted by an address.
-    function _setNumberMinted(address addr, uint32 value) internal {
-        _setAux(addr, value);
-    }
-
     /// @dev Returns the starting token ID. Override this function to change the starting token ID.
     function _startTokenId() internal view virtual returns (uint256) {
         return 0;
@@ -247,6 +237,11 @@ abstract contract ERC721T is ERC721 {
     /// @dev Returns the total number of burned tokens.
     function _totalBurned() internal view returns (uint256) {
         return _burnCounter;
+    }
+
+    /// @dev Returns the number of tokens minted by an address.
+    function _numberMinted(address addr) internal view returns (uint32) {
+        return uint32(_getAux(addr));
     }
 
     /// @dev Reverts if the tier ID is zero or bigger than maximum tier ID.
