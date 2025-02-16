@@ -155,22 +155,23 @@ abstract contract ERC721T is ERC721 {
         uint56 tier,
         uint256 quantity
     ) internal OnlyValidTier(tier) {
-        uint256 startTokenId = _nextTokenId();  
-        uint256 endTokenId = startTokenId + quantity;
+        uint256 startTokenId = _nextTokenId();
 
-        unchecked { _currentIndex += quantity; }
+        unchecked {
+            uint256 endTokenId = startTokenId + quantity - 1;
+            _currentIndex += quantity;
+        
+            for (uint256 i = 0; i < quantity;) {
+                _mint(to, startTokenId + i);
+                ++i;
+            }
 
-        for (uint256 i = 0; i < quantity;) {
-            _mint(to, startTokenId + i);
-            unchecked { ++i; }
+            for (uint256 i = 0; i < quantity;) {
+                _setMintExtraData(startTokenId + i, tier);
+                ++i;
+            }
+            emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
         }
-
-        for (uint256 i = 0; i < quantity;) {
-            _setMintExtraData(startTokenId + i, tier);
-            unchecked { ++i; }
-        }
-
-        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints multiple tokens with the same tier in a single batch.
@@ -179,22 +180,23 @@ abstract contract ERC721T is ERC721 {
         uint56 tier,
         uint256 quantity
     ) internal OnlyValidTier(tier) {
-        uint256 startTokenId = _nextTokenId();  
-        uint256 endTokenId = startTokenId + quantity;
+        uint256 startTokenId = _nextTokenId();
 
-        unchecked { _currentIndex += quantity; }
+        unchecked {
+            uint256 endTokenId = startTokenId + quantity - 1;
+            _currentIndex += quantity;
+        
+            for (uint256 i = 0; i < quantity;) {
+                _safeMint(to, startTokenId + i);
+                ++i;
+            }
 
-        for (uint256 i = 0; i < quantity;) {
-            _safeMint(to, startTokenId + i);
-            unchecked { ++i; }
+            for (uint256 i = 0; i < quantity;) {
+                _setMintExtraData(startTokenId + i, tier);
+                ++i;
+            }
+            emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
         }
-
-        for (uint256 i = 0; i < quantity;) {
-            _setMintExtraData(startTokenId + i, tier);
-            unchecked { ++i; }
-        }
-
-        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Burns a token and resets its tier data.
