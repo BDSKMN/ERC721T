@@ -1,74 +1,75 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {ERC721} from "@solady/tokens/ERC721.sol";
+import {ERC721} from "solady/tokens/ERC721.sol";
 
-/// @title ERC721T
-/// @author 0xkuwabatake
-/// @notice A contract extension to create a tier-based ERC721 NFT collection.
-/// @dev Note:
-/// - The contract is an abstract contract that inherit to Simple ERC721 implementation by Solady
-///   (https://github.com/vectorized/solady/blob/main/src/tokens/ERC721.sol).
-/// - The contract is intended to be used as base contract by child (implementation) contract.
-/// - Token IDs are minted in sequential order (e.g. 0, 1, 2, 3, ...) starting from `_startTokenId()`,
-///   but this extension DOES NOT provide the batch creation of token IDs mechanism.
-/// - Tier ID is a generic identifier to map some minted token IDs to return similar token URI value.
-///   This identifier is created when a child contract call `_setTierURI` method, with its parameters:
-///   - `tierId` is an arbitrary uint256 value. If not exist, it will create a new tier ID. If exist,
-///      the intention is to change the existing `tierURI` corresponds to its `tierId`.
-///   - `tierURI` MUST NOT an empty string to differentiate it from non-existent tier URI. 
-///      This implementation won't check if the URI follows the ERC721 Metadata JSON schema or not, 
-///      responsibility is delegated to the caller.
-///
-/// If you are overriding:
-/// - MAKE SURE to not violate the creation of non-empty string tier URI before token ID creation.
-///   It can be achieved by NOT REMOVING `if (bytes(_tierURI[tierId]).length == 0) revert TierDoesNotExist();`
-///   checker before call _mint(to, tokenId) from ERC721 contract.
+/// @title ERC721-T
+/// @author 0xkuwabatake (@0xkuwabatake)
+/// @notice Abstract ERC721 contract with tier-based structure and sequential minting, 
+///         using extra data packing for efficiency.
+/// @dev    Extends Solady's ERC721 and modifies it to support sequential minting 
+///         while mapping tokens to tiers via bitwise operations.
 abstract contract ERC721T is ERC721 {
+    /*//////////////////////////////////////////////////////////////
+                                CONSTANTS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Bit position for tier ID in extra data.
+    uint96 private constant _BITPOS_TIER_ID = 56;
+
+    /// @dev Bit position for number of minted tokens in aux data.
+    uint224 private constant _BITPOS_NUMBER_MINTED = 32;
+
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev The next token ID to be minted.
+    /// @dev Tracks the next token ID to be minted.
     uint256 private _currentIndex;
 
-    /// @dev The number of tokens burned.
-    uint256 private _burnCounter;
+    /// @dev Tracks the number of burned tokens.
+    uint256 internal _burnCounter;
 
-    /// @dev Token name.
+    /// @dev Name of the token collection.
     string private _name;
 
-    /// @dev Token symbol.
+    /// @dev Symbol of the token collection.
     string private _symbol;
 
-    /// @dev Mapping from token ID to tier ID.
-    mapping (uint256 => uint256) internal _tierId;
-
-    /// @dev Mapping from tier ID to tier URI.
-    mapping (uint256 => string) internal _tierURI;
-
     /*//////////////////////////////////////////////////////////////
-                                EVENTS
+                            CUSTOM EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Emitted when `tokenId` is minted and mapped to `tierId`.
-    event TierMinted (uint256 indexed tokenId, uint256 indexed tierId);
+    /// @dev Emitted when a token is set to a tier.
+    event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint256 atTimestamp);
 
-    /// @dev Emitted when `tokenId` is burned and unmapped from `tierId`.
-    event TierBurned (uint256 indexed tokenId, uint256 indexed tierId);
+    /// @dev Emitted when multiple tokens are set to a tier in batch minting.
+    event BatchTierSet(
+        uint256 indexed startId,
+        uint256 indexed endId,
+        uint56 indexed tierId,
+        uint256 atTimestamp
+    );
 
-    /// @dev Emitted when `tierURI` is set and mapped to `tier`.
-    event TierURI (uint256 indexed tier, string tierURI);
+    /// @dev Emitted when a token's tier is reset (burned).
+    event TierReset(uint256 indexed tokenId, uint56 indexed tierId);
 
     /*//////////////////////////////////////////////////////////////
-                            CUSTOM ERRORS
+                            CUSTOM ERROR
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev The tier ID does not exist.
-    error TierDoesNotExist();
+    /// @dev Reverts if the tier ID is zero.
+    error TierCanNotBeZero();
 
-    /// @dev The URI can not be empty string.
-    error URICanNotBeEmptyString();
+    /*//////////////////////////////////////////////////////////////
+                                MODIFIER
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Ensures the tier ID is not zero.
+    modifier TierIsNotZero(uint56 tier) {
+        _requireTierIsNotZero(tier);
+        _;
+    }
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
@@ -81,7 +82,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC FUNCTIONS
+                        PUBLIC VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Returns the token collection name.
@@ -94,28 +95,29 @@ abstract contract ERC721T is ERC721 {
         return _symbol;
     }
 
-    /// @dev Returns tier ID from `tokenId`.
-    function getTierId(uint256 tokenId) public view virtual returns (uint256) {
-        if (!_exists(tokenId)) _revert(TokenDoesNotExist.selector);
-        return _tierId[tokenId];
-    }
-
-    /// @dev Returns tier URI from `tierId`.
-    function getTierURI(uint256 tierId) public view virtual returns (string memory) {
-        if (bytes(_tierURI[tierId]).length == 0) _revert(TierDoesNotExist.selector);
-        return _tierURI[tierId];
-    }
-
-    /// @dev See {ERC721 - tokenURI}.
+    /// @dev Returns the token URI for a given token ID.
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        if (!_exists(tokenId)) _revert(TokenDoesNotExist.selector);
-        uint256 tierId = _tierId[tokenId];
-        string memory tierURI = _tierURI[tierId];
-        return tierURI;
+        if (!_exists(tokenId)) _rv(uint32(TokenDoesNotExist.selector));
+        return "";
     }
 
-    /// @dev Returns the total number of tokens in existence.
-    function totalSupply() public view virtual returns (uint256) {
+    /// @dev Returns the tier ID associated with a token.
+    function tierId(uint256 tokenId) public view returns (uint56) {
+        return uint56(_getExtraData(tokenId));
+    }
+
+    /// @dev Returns the timestamp when the token was minted.
+    function mintTimestamp(uint256 tokenId) public view returns (uint40) {
+        return uint40(_getExtraData(tokenId) >> _BITPOS_TIER_ID);
+    }
+
+    /// @dev Returns the number of tokens minted by an address.
+    function numberMinted(address addr) public view returns (uint32) {
+        return uint32(_getAux(addr));
+    }
+
+    /// @dev Returns the total supply of tokens in circulation.
+    function totalSupply() public view returns (uint256) {
         unchecked {
             return _currentIndex - _burnCounter - _startTokenId();
         }
@@ -125,78 +127,151 @@ abstract contract ERC721T is ERC721 {
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Mints single quantity of token ID  to `to` and map it to `tierid`.
-    /// @param to cannot be the zero address.
-    /// @param tierId must exist. It exists if the corresponding tier URI is not an empty string.
-    function _mintTier(address to, uint256 tierId) internal virtual {
-        if (bytes(_tierURI[tierId]).length == 0) _revert(TierDoesNotExist.selector);
-        uint256 _tokenId = _nextTokenId();
-        _tierId[_tokenId] = tierId;
-        unchecked {
-            ++_currentIndex;
-        }
-        _mint(to, _tokenId);
+    /// @dev Mints multiple tokens with the same tier in a single batch.
+    function _batchMintTier(
+        address to,
+        uint56 tier,
+        uint256 quantity
+    ) internal TierIsNotZero(tier) {
+        uint256 startTokenId = _currentIndex;  
+        uint256 endTokenId = startTokenId + quantity;
 
-        emit TierMinted(_tokenId, tierId);
+        unchecked { _currentIndex += quantity; }
+
+        for (uint256 i = 0; i < quantity;) {
+            _mint(to, startTokenId + i);
+            unchecked { ++i; }
+        }
+
+        for (uint256 i = 0; i < quantity;) {
+            _setMintExtraData(startTokenId + i, tier);
+            unchecked { ++i; }
+        }
+
+        emit BatchTierSet(startTokenId, endTokenId, tier, block.timestamp);
     }
 
-    /// @dev Burns single quantity of `tokenId` and unmap it from its tier ID.
-    /// @param tokenId must exist.
-    function _burnTier(uint256 tokenId) internal virtual {
-        uint256 tierId_ = _tierId[tokenId];
-        delete _tierId[tokenId];
-        unchecked {
-            ++_burnCounter;
+    /// @dev Safely mints multiple tokens with the same tier in a single batch.
+    function _batchSafeMintTier(
+        address to,
+        uint56 tier,
+        uint256 quantity
+    ) internal TierIsNotZero(tier) {
+        uint256 startTokenId = _currentIndex;  
+        uint256 endTokenId = startTokenId + quantity;
+
+        unchecked { _currentIndex += quantity; }
+
+        for (uint256 i = 0; i < quantity;) {
+            _safeMint(to, startTokenId + i);
+            unchecked { ++i; }
         }
+
+        for (uint256 i = 0; i < quantity;) {
+            _setMintExtraData(startTokenId + i, tier);
+            unchecked { ++i; }
+        }
+
+        emit BatchTierSet(startTokenId, endTokenId, tier, block.timestamp);
+    }
+
+    /// @dev Mints a token and assigns it a tier.
+    function _mintTier(address to, uint56 tier) internal TierIsNotZero(tier) {
+        uint256 tokenId = _currentIndex;
+        unchecked { ++tokenId; }
+        _mint(to, tokenId);
+        _setMintExtraData(tokenId, tier);
+        emit TierSet(tokenId, tier, block.timestamp);
+    }
+
+    /// @dev Safely mints a token and assigns it a tier.
+    function _safeMintTier(address to, uint56 tier) internal TierIsNotZero(tier) {
+        uint256 tokenId = _currentIndex;
+        unchecked { ++tokenId; }
+        _safeMint(to, tokenId);
+        _setMintExtraData(tokenId, tier);
+        emit TierSet(tokenId, tier, block.timestamp);
+    }
+
+    /// @dev Burns a token and resets its tier data.
+    function _burnTier(uint256 tokenId) internal {
+        unchecked { ++_burnCounter; }
+        _resetMintExtraData(tokenId);
         _burn(tokenId);
-
-        emit TierBurned(tokenId, tierId_);
+        emit TierReset(tokenId, tierId(tokenId));
     }
 
-    /// @dev Burns single quantity of `tokenId` by `by` and unmap it from its tier ID.
-    /// @param by is the owner of the existing `tokenId` or approved operator.
-    /// @param tokenId must exist.
-    function _burnTier(address by, uint256 tokenId) internal virtual {
-        uint256 tierId_ = _tierId[tokenId];
-        delete _tierId[tokenId];
-        unchecked {
-            ++_burnCounter;
-        }
+    /// @dev Burns a token on behalf of an address and resets its tier data.
+    function _burnTier(address by, uint256 tokenId) internal {
+        unchecked { ++_burnCounter; }
+        _resetMintExtraData(tokenId);
         _burn(by, tokenId);
-
-        emit TierBurned(tokenId, tierId_);
+        emit TierReset(tokenId, tierId(tokenId));
     }
 
-    /// @dev Sets 'tierURI' as the URI of 'tierId'.
-    /// @param tierId is an arbitrary uint256 value as tier ID.
-    /// @param tierURI MUST NOT an empty string to differentiate it from non-existent tier URI.
-    function _setTierURI(uint256 tierId, string memory tierURI) internal virtual {
-        if (bytes(tierURI).length == 0) _revert(URICanNotBeEmptyString.selector);
-        _tierURI[tierId] = tierURI;
-
-        emit TierURI(tierId, tierURI);
+    /// @dev Sets the extra data for a token to store tier and timestamp.
+    function _setMintExtraData(uint256 tokenId, uint56 tier) internal {
+        uint96 packed = uint96(tier) | uint96(block.timestamp) << _BITPOS_TIER_ID; 
+        _setExtraData(tokenId, packed);
     }
 
-    /// @dev Returns the starting token ID for sequential mints.
+    /// @dev Resets the extra data of a token.
+    function _resetMintExtraData(uint256 tokenId) internal {
+        _setExtraData(tokenId, 0);
+    }
+
+    /// @dev Sets the number of tokens minted by an address.
+    function _setNumberMinted(address addr, uint32 value) internal {
+        _setAux(addr, value);
+    }
+
+    /// @dev Returns the starting token ID. Override this function to change the starting token ID.
     function _startTokenId() internal view virtual returns (uint256) {
         return 0;
     }
 
     /// @dev Returns the next token ID to be minted.
-    function _nextTokenId() internal view virtual returns (uint256) {
+    function _nextTokenId() internal view returns (uint256) {
         return _currentIndex;
     }
 
-    /// @dev Returns the total number of tokens burned.
-    function _totalBurned() internal view virtual returns (uint256) {
+    /// @dev Returns the total number of burned tokens.
+    function _totalBurned() internal view returns (uint256) {
         return _burnCounter;
     }
 
-    /// @dev For more efficient reverts.
-    function _revert(bytes4 errorSelector) internal pure {
+    /// @dev Reverts if the tier ID is zero.
+    function _requireTierIsNotZero(uint56 tier) internal pure {
+        if (tier == 0) _rv(uint32(TierCanNotBeZero.selector));
+    }
+
+    /// @dev Converts a uint256 value to a string.
+    function _toString(uint256 value) internal pure returns (string memory result) {
+        /// @solidity memory-safe-assembly
         assembly {
-            mstore(0x00, errorSelector)
-            revert(0x00, 0x04)
+            result := add(mload(0x40), 0x80)
+            mstore(0x40, add(result, 0x20))
+            mstore(result, 0)
+            let end := result
+            let w := not(0)
+            for { let temp := value } 1 {} {
+                result := add(result, w)
+                mstore8(result, add(48, mod(temp, 10)))
+                temp := div(temp, 10)
+                if iszero(temp) { break }
+            }
+            let n := sub(end, result)
+            result := sub(result, 0x20)
+            mstore(result, n)
+        }
+    }
+
+    /// @dev Efficient way to revert with a specific error code.
+    function _rv(uint32 s) internal pure {
+        /// @solidity memory-safe-assembly
+        assembly {
+            mstore(0x00, s)
+            revert(0x1c, 0x04)
         }
     }
 }
