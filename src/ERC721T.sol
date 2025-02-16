@@ -44,14 +44,14 @@ abstract contract ERC721T is ERC721 {
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Emitted when a token is set to a tier.
-    event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint256 atTimestamp);
+    event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint40 atTimestamp);
 
     /// @dev Emitted when multiple tokens are set to a tier in batch minting.
     event BatchTierSet(
         uint256 indexed startId,
         uint256 indexed endId,
         uint56 indexed tierId,
-        uint256 atTimestamp
+        uint40 atTimestamp
     );
 
     /// @dev Emitted when a token's tier is reset (burned).
@@ -154,7 +154,7 @@ abstract contract ERC721T is ERC721 {
             unchecked { ++i; }
         }
 
-        emit BatchTierSet(startTokenId, endTokenId, tier, block.timestamp);
+        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints multiple tokens with the same tier in a single batch.
@@ -178,7 +178,7 @@ abstract contract ERC721T is ERC721 {
             unchecked { ++i; }
         }
 
-        emit BatchTierSet(startTokenId, endTokenId, tier, block.timestamp);
+        emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Mints a token and assigns it a tier.
@@ -187,7 +187,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++tokenId; }
         _mint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, block.timestamp);
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints a token and assigns it a tier.
@@ -196,7 +196,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++tokenId; }
         _safeMint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, block.timestamp);
+        emit TierSet(tokenId, tier, uint40(block.timestamp));
     }
 
     /// @dev Burns a token and resets its tier data.
