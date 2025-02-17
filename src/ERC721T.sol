@@ -14,9 +14,6 @@ abstract contract ERC721T is ERC721 {
                                 CONSTANTS
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Maximum tier ID is 72057594037927935.
-    uint56 internal constant _MAX_TIER_ID = 0xFFFFFFFFFFFFFF;
-
     /// @dev Bit position for tier ID in extra data.
     uint96 private constant _BITPOS_TIER_ID = 56;
 
@@ -75,7 +72,7 @@ abstract contract ERC721T is ERC721 {
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Ensures the tier ID is not zero.
-    modifier OnlyValidTier(uint56 tier) {
+    modifier TierIsNotZero(uint56 tier) {
         _validateTierId(tier);
         _;
     }
@@ -132,7 +129,7 @@ abstract contract ERC721T is ERC721 {
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Mints a token and assigns it a tier.
-    function _mintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
+    function _mintTier(address to, uint56 tier) internal TierIsNotZero(tier) {
         uint256 tokenId = _nextTokenId();
         unchecked { ++_currentIndex; }
         _mint(to, tokenId);
@@ -141,7 +138,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Safely mints a token and assigns it a tier.
-    function _safeMintTier(address to, uint56 tier) internal OnlyValidTier(tier) {
+    function _safeMintTier(address to, uint56 tier) internal TierIsNotZero(tier) {
         uint256 tokenId = _nextTokenId();
         unchecked { ++_currentIndex; }
         _safeMint(to, tokenId);
@@ -154,7 +151,7 @@ abstract contract ERC721T is ERC721 {
         address to,
         uint56 tier,
         uint256 quantity
-    ) internal OnlyValidTier(tier) {
+    ) internal TierIsNotZero(tier) {
         uint256 startTokenId = _nextTokenId();
 
         unchecked {
@@ -179,7 +176,7 @@ abstract contract ERC721T is ERC721 {
         address to,
         uint56 tier,
         uint256 quantity
-    ) internal OnlyValidTier(tier) {
+    ) internal TierIsNotZero(tier) {
         uint256 startTokenId = _nextTokenId();
 
         unchecked {
@@ -246,10 +243,9 @@ abstract contract ERC721T is ERC721 {
         return uint32(_getAux(addr));
     }
 
-    /// @dev Reverts if the tier ID is zero or bigger than maximum tier ID.
+    /// @dev Reverts if the tier ID is zero.
     function _validateTierId(uint56 tier) internal pure {
         if (tier == 0) _rv(uint32(TierCanNotBeZero.selector));
-        if (tier > _MAX_TIER_ID) _rv(uint32(TierExceedsMaximumTierID.selector));
     }
 
     /// @dev Converts a uint256 value to a string.
