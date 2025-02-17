@@ -11,8 +11,8 @@ ERC721T extends [Solady’s ERC721](https://github.com/Vectorized/solady/blob/ma
 
 ## How It Works
 1.	Tier ID is assigned on mint, stored via extra data in Solady’s ERC721.
-	•	Tier ID cannot be zero, as zero is the default value for non-minted tokens.
-	•	When a token is burned, its tier ID resets to zero, ensuring no ambiguity in existence.
+	  - Tier ID cannot be zero, as zero is the default value for non-minted tokens.
+	  - When a token is burned, its tier ID resets to zero, ensuring no ambiguity in existence.
 2.	Minting follows a sequential ID model, which is ideal for NFT collections, maintaining a structured token distribution.
 3.	Supports batch minting, allowing multiple tokens to be assigned the same Tier ID in one transaction.
 
