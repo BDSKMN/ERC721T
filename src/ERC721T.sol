@@ -232,11 +232,6 @@ abstract contract ERC721T is ERC721 {
         return _burnCounter;
     }
 
-    /// @dev Returns the number of tokens minted by an address.
-    function _numberMinted(address addr) internal view returns (uint32) {
-        return uint32(_getAux(addr));
-    }
-
     /// @dev Reverts if the tier ID is zero.
     function _validateTierId(uint56 tier) internal pure {
         if (tier == 0) _rv(uint32(TierCanNotBeZero.selector));
