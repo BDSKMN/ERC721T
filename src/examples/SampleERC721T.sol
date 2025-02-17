@@ -25,6 +25,10 @@ contract SampleERC721T is ERC721T, Ownable {
         _batchSafeMintTier(to, tierId, quantity);
     }
 
+    function burnTierFrom(address owner, uint256 tokenId) public {
+        _burnTier(owner, tokenId);
+    }
+
     function airdropTier(address[] calldata recipients, uint56 tierId) public onlyOwner {
         for (uint256 i = 0; i < recipients.length;) {
             _mintTier(recipients[i], tierId);
@@ -32,12 +36,8 @@ contract SampleERC721T is ERC721T, Ownable {
         }
     }
 
-    function burnTier(uint256 tokenId) public {
+    function burnTier(uint256 tokenId) public onlyOwner {
         _burnTier(tokenId);
-    }
-
-    function burnTierFrom(address owner, uint256 tokenId) public {
-        _burnTier(owner, tokenId);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
