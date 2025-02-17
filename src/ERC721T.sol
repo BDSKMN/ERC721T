@@ -208,7 +208,7 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Sets the extra data for a token to store tier and timestamp.
     function _setMintExtraData(uint256 tokenId, uint56 tier) internal {
-        uint96 packed = uint96(tier) | uint96(block.timestamp) << _BITPOS_TIER_ID; 
+        uint96 packed = uint96(tier) | uint96(uint40(block.timestamp)) << _BITPOS_TIER_ID; 
         _setExtraData(tokenId, packed);
     }
 
