@@ -79,7 +79,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /*//////////////////////////////////////////////////////////////
-                        PUBLIC VIEW FUNCTIONS
+                            ERC721 METADATA
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Returns the token collection name.
@@ -97,6 +97,10 @@ abstract contract ERC721T is ERC721 {
         if (!_exists(tokenId)) _rv(uint32(TokenDoesNotExist.selector));
         return "";
     }
+
+    /*//////////////////////////////////////////////////////////////
+                        PUBLIC VIEW FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev Returns the tier ID associated with a token.
     function tierId(uint256 tokenId) public view returns (uint56) {
@@ -116,7 +120,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            INTERNAL FUNCTIONS
+                    INTERNAL MINT & BURN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Mints a token and assigns it a tier.
@@ -203,6 +207,10 @@ abstract contract ERC721T is ERC721 {
         emit TierReset(tokenId, tierId(tokenId));
     }
 
+    /*//////////////////////////////////////////////////////////////
+                        INTERNAL SETTER FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
     /// @dev Sets the extra data for a token to store tier and timestamp.
     function _setMintExtraData(uint256 tokenId, uint56 tier) internal {
         uint96 packed = uint96(tier) | uint96(uint40(block.timestamp)) << _BITPOS_TIER_ID; 
@@ -214,7 +222,12 @@ abstract contract ERC721T is ERC721 {
         _setExtraData(tokenId, 0);
     }
 
-    /// @dev Returns the starting token ID. Override this function to change the starting token ID.
+    /*//////////////////////////////////////////////////////////////
+                        INTERNAL VIEW FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Returns the starting token ID. 
+    /// Note: Override this function to change the starting token ID.
     function _startTokenId() internal view virtual returns (uint256) {
         return 0;
     }
@@ -228,6 +241,10 @@ abstract contract ERC721T is ERC721 {
     function _totalBurned() internal view returns (uint256) {
         return _burnCounter;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                        INTERNAL HELPER FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev Reverts if the tier ID is zero.
     function _validateTierId(uint56 tier) internal pure {
