@@ -25,7 +25,7 @@ contract SampleERC721T is ERC721T, Ownable {
         _batchSafeMintTier(to, tierId, quantity);
     }
 
-    function burnTierFrom(address owner, uint256 tokenId) public {
+    function burnTierBy(address owner, uint256 tokenId) public {
         _burnTier(owner, tokenId);
     }
 
