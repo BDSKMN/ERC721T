@@ -45,8 +45,8 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Emitted when multiple tokens are set to a tier in batch minting.
     event BatchTierSet(
-        uint256 indexed startId,
-        uint256 indexed endId,
+        uint256 indexed startTokenId,
+        uint256 indexed endTokenId,
         uint56 indexed tierId,
         uint40 atTimestamp
     );
