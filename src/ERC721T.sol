@@ -11,14 +11,11 @@ import {ERC721} from "solady/tokens/ERC721.sol";
 ///         while mapping tokens to tiers via bitwise operations.
 abstract contract ERC721T is ERC721 {
     /*//////////////////////////////////////////////////////////////
-                                CONSTANTS
+                                CONSTANT
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Bit position for tier ID in extra data.
     uint96 private constant _BITPOS_TIER_ID = 56;
-
-    /// @dev Bit position for number of minted tokens in aux data.
-    uint224 private constant _BITPOS_NUMBER_MINTED = 32;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
