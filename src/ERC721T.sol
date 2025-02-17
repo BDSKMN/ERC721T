@@ -55,17 +55,11 @@ abstract contract ERC721T is ERC721 {
     event TierReset(uint256 indexed tokenId, uint56 indexed tierId);
 
     /*//////////////////////////////////////////////////////////////
-                            CUSTOM ERRORS
+                            CUSTOM ERROR
     //////////////////////////////////////////////////////////////*/
-
-    /// @dev Unable to cast to the target type due to overflow.
-    error Overflow();
 
     /// @dev Reverts if the tier ID is zero.
     error TierCanNotBeZero();
-
-    /// @dev Reverts if the tier ID exceeds maximum tier ID.
-    error TierExceedsMaximumTierID();
 
     /*//////////////////////////////////////////////////////////////
                                 MODIFIER
