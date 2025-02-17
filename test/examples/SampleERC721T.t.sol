@@ -27,7 +27,6 @@ contract SampleERC721TTest is Test {
     error TokenDoesNotExist();
     error Unauthorized();
     error TierCanNotBeZero();
-    error TierExceedsMaximumTierID();
 
     function setUp() external {
         sampleERC721T = new SampleERC721T();
