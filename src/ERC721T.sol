@@ -152,16 +152,14 @@ abstract contract ERC721T is ERC721 {
         unchecked {
             uint256 endTokenId = startTokenId + quantity - 1;
             _currentIndex += quantity;
-        
-            for (uint256 i = 0; i < quantity;) {
-                _mint(to, startTokenId + i);
-                ++i;
-            }
 
-            for (uint256 i = 0; i < quantity;) {
+            uint256 i;
+            do {
+                _mint(to, startTokenId + i);
                 _setMintExtraData(startTokenId + i, tier);
                 ++i;
-            }
+            } while (i != quantity);
+        
             emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
         }
     }
@@ -177,16 +175,14 @@ abstract contract ERC721T is ERC721 {
         unchecked {
             uint256 endTokenId = startTokenId + quantity - 1;
             _currentIndex += quantity;
-        
-            for (uint256 i = 0; i < quantity;) {
-                _safeMint(to, startTokenId + i);
-                ++i;
-            }
 
-            for (uint256 i = 0; i < quantity;) {
+            uint256 i;
+            do {
+                _safeMint(to, startTokenId + i);
                 _setMintExtraData(startTokenId + i, tier);
                 ++i;
-            }
+            } while (i != quantity);
+        
             emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
         }
     }
