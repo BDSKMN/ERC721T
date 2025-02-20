@@ -95,7 +95,13 @@ abstract contract ERC721T is ERC721 {
     /// @dev Returns the token URI for a given token ID.
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         if (!_exists(tokenId)) _rv(uint32(TokenDoesNotExist.selector));
-        return "";
+
+        string memory baseTierURI = _baseTierURI();
+        uint256 tier = uint256(tierId(tokenId));
+        return bytes(baseTierURI).length != 0
+            ? string(abi.encodePacked(baseTierURI, _toString(tier), '/', _toString(tokenId))) 
+            : ''
+        ;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -236,6 +242,13 @@ abstract contract ERC721T is ERC721 {
     /// @dev Returns the total number of burned tokens.
     function _totalBurned() internal view returns (uint256) {
         return _burnCounter;
+    }
+
+    /// @dev @dev Base tier URI for computing {tokenURI}.
+    /// Note: If set, the resulting URI for each token will be the concatenation of the `baseURI`,
+    ///       `tierId` and the `tokenId`. Empty by default, it can be overridden in child contracts.
+    function _baseTierURI() internal view virtual returns (string memory) {
+        return '';
     }
 
     /*//////////////////////////////////////////////////////////////
