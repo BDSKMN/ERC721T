@@ -245,7 +245,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev @dev Base tier URI for computing {tokenURI}.
-    /// Note: If set, the resulting URI for each token will be the concatenation of the `baseURI`,
+    /// Note: If set, the resulting URI for each token will be the concatenation of the `baseTierURI`,
     ///       `tierId` and the `tokenId`. Empty by default, it can be overridden in child contracts.
     function _baseTierURI() internal view virtual returns (string memory) {
         return '';
