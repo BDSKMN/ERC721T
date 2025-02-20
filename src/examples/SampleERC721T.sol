@@ -5,6 +5,7 @@ import {ERC721T} from "src/ERC721T.sol";
 import {Ownable} from "lib/solady/src/auth/Ownable.sol";
 
 contract SampleERC721T is ERC721T, Ownable {
+
     constructor() ERC721T("Sample ERC721T", "S721T") {
         _initializeOwner(msg.sender);
     }
@@ -40,11 +41,7 @@ contract SampleERC721T is ERC721T, Ownable {
         _burnTier(tokenId);
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        if (!_exists(tokenId)) _rv(uint32(TokenDoesNotExist.selector));
-        uint256 tierId = uint256(tierId(tokenId));
-        return string(
-            abi.encodePacked("ipfs://foobar/", _toString(tierId), "/", _toString(tokenId))
-        );
+    function _baseTierURI() internal view virtual override returns (string memory) {
+        return 'ipfs://foobar/';
     }
 }
