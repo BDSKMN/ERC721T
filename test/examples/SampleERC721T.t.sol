@@ -20,7 +20,7 @@ contract SampleERC721TTest is Test {
 
     event Transfer(address indexed from, address indexed to, uint256 indexed id);
     event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint256 atTimestamp);
-    event BatchTierSet(uint256 indexed startId, uint256 indexed endId, uint56 indexed tierId, uint256 atTimestamp);
+    event BatchTierSet(uint256 indexed fromTokenId, uint256 indexed quantity, uint56 indexed tierId, uint256 atTimestamp);
     event TierReset(uint256 indexed tokenId, uint56 indexed tierId);
 
     error NotOwnerNorApproved();
@@ -115,18 +115,18 @@ contract SampleERC721TTest is Test {
         emit Transfer(address(0), MINTER_OR_BURNER, 0);
         emit Transfer(address(0), MINTER_OR_BURNER, 1);
         emit Transfer(address(0), MINTER_OR_BURNER, 2);
-        emit BatchTierSet(0, 2, 1, CURRENT_BLOCKTIMESTAMP);
+        emit BatchTierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.batchMintTier(MINTER_OR_BURNER, 1, 3);
     }
 
     function test_BatchSafeMintTier() public {
         vm.warp(CURRENT_BLOCKTIMESTAMP);
-        vm.prank(address(0xA11CE));
+        vm.prank(address(MINTER_OR_BURNER));
         vm.expectEmit();
         emit Transfer(address(0), MINTER_OR_BURNER, 0);
         emit Transfer(address(0), MINTER_OR_BURNER, 1);
         emit Transfer(address(0), MINTER_OR_BURNER, 2);
-        emit BatchTierSet(0, 2, 1, CURRENT_BLOCKTIMESTAMP);
+        emit BatchTierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.batchSafeMintTier(MINTER_OR_BURNER, 1, 3);
     }
 
