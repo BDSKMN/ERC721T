@@ -42,8 +42,8 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Emitted when multiple tokens are set to a tier in batch minting.
     event BatchTierSet(
-        uint256 indexed startTokenId,
-        uint256 indexed endTokenId,
+        uint256 indexed fromTokenId,
+        uint256 indexed quantity,
         uint56 indexed tierId,
         uint40 atTimestamp
     );
@@ -153,20 +153,19 @@ abstract contract ERC721T is ERC721 {
         uint56 tier,
         uint256 quantity
     ) internal TierIsNotZero(tier) {
-        uint256 startTokenId = _nextTokenId();
+        uint256 fromTokenId = _nextTokenId();
 
         unchecked {
-            uint256 endTokenId = startTokenId + quantity - 1;
             _currentIndex += quantity;
 
             uint256 i;
             do {
-                _mint(to, startTokenId + i);
-                _setMintExtraData(startTokenId + i, tier);
+                _mint(to, fromTokenId + i);
+                _setMintExtraData(fromTokenId + i, tier);
                 ++i;
             } while (i != quantity);
         
-            emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
+            emit BatchTierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
         }
     }
 
@@ -176,20 +175,19 @@ abstract contract ERC721T is ERC721 {
         uint56 tier,
         uint256 quantity
     ) internal TierIsNotZero(tier) {
-        uint256 startTokenId = _nextTokenId();
+        uint256 fromTokenId = _nextTokenId();
 
         unchecked {
-            uint256 endTokenId = startTokenId + quantity - 1;
             _currentIndex += quantity;
 
             uint256 i;
             do {
-                _safeMint(to, startTokenId + i);
-                _setMintExtraData(startTokenId + i, tier);
+                _safeMint(to, fromTokenId + i);
+                _setMintExtraData(fromTokenId + i, tier);
                 ++i;
             } while (i != quantity);
         
-            emit BatchTierSet(startTokenId, endTokenId, tier, uint40(block.timestamp));
+            emit BatchTierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
         }
     }
 
