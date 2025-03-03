@@ -34,14 +34,11 @@ abstract contract ERC721T is ERC721 {
     string private _symbol;
 
     /*//////////////////////////////////////////////////////////////
-                            CUSTOM EVENTS
+                            CUSTOM EVENT
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Emitted when a token is set to a tier.
-    event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint40 atTimestamp);
-
-    /// @dev Emitted when multiple tokens are set to a tier in batch minting.
-    event BatchTierSet(
+    /// @dev Emitted when from token with quantity is set to a tier.
+    event TierSet(
         uint256 indexed fromTokenId,
         uint256 indexed quantity,
         uint56 indexed tierId,
@@ -135,7 +132,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++_currentIndex; }
         _mint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, uint40(block.timestamp));
+        emit TierSet(tokenId, 1, tier, uint40(block.timestamp));
     }
 
     /// @dev Safely mints a token and assigns it a tier.
@@ -144,7 +141,7 @@ abstract contract ERC721T is ERC721 {
         unchecked { ++_currentIndex; }
         _safeMint(to, tokenId);
         _setMintExtraData(tokenId, tier);
-        emit TierSet(tokenId, tier, uint40(block.timestamp));
+        emit TierSet(tokenId, 1, tier, uint40(block.timestamp));
     }
 
     /// @dev Mints multiple tokens with the same tier in a single batch.
@@ -165,7 +162,7 @@ abstract contract ERC721T is ERC721 {
                 ++i;
             } while (i != quantity);
         
-            emit BatchTierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
+            emit TierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
         }
     }
 
@@ -187,7 +184,7 @@ abstract contract ERC721T is ERC721 {
                 ++i;
             } while (i != quantity);
         
-            emit BatchTierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
+            emit TierSet(fromTokenId, quantity, tier, uint40(block.timestamp));
         }
     }
 
