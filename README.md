@@ -1,7 +1,7 @@
 # ERC721T
 
 ## About
-ERC721T extends [Solady’s ERC721](https://github.com/Vectorized/solady/blob/main/src/tokens/ERC721.sol) by mapping token IDs to Tier IDs using extra data packing, enabling tier-based NFT collections with efficient on-chain storage.
+ERC721T extends[Solady’s ERC721](https://github.com/Vectorized/solady/blob/main/src/tokens/ERC721.sol) by leveraging the 96-bit extra data (via [`_setExtraData`](https://github.com/Vectorized/solady/blob/main/src/tokens/ERC721.sol#L424)) to map token IDs to tier IDs, enabling tier-based NFT collections with efficient on-chain storage.
 
 ## Use Cases
 1. Tier-Based Membership NFTs (e.g., Gold, Silver, Bronze memberships)
