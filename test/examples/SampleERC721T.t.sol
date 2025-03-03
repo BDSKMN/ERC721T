@@ -19,8 +19,7 @@ contract SampleERC721TTest is Test {
     address contractOwner;
 
     event Transfer(address indexed from, address indexed to, uint256 indexed id);
-    event TierSet(uint256 indexed tokenId, uint56 indexed tierId, uint256 atTimestamp);
-    event BatchTierSet(uint256 indexed fromTokenId, uint256 indexed quantity, uint56 indexed tierId, uint256 atTimestamp);
+    event TierSet(uint256 indexed fromTokenId, uint256 indexed quantity, uint56 indexed tierId, uint256 atTimestamp);
     event TierReset(uint256 indexed tokenId, uint56 indexed tierId);
 
     error NotOwnerNorApproved();
@@ -95,7 +94,7 @@ contract SampleERC721TTest is Test {
         vm.warp(CURRENT_BLOCKTIMESTAMP);
         vm.expectEmit();
         emit Transfer(address(0), MINTER_OR_BURNER, 0); // Token ID starts from zero
-        emit TierSet(0, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(0, 1, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.mintTier(MINTER_OR_BURNER, 1);
     }
 
@@ -104,7 +103,7 @@ contract SampleERC721TTest is Test {
         vm.prank(MINTER_OR_BURNER);
         vm.expectEmit();
         emit Transfer(address(0), MINTER_OR_BURNER, 0);
-        emit TierSet(0, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(0, 1, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.safeMintTier(MINTER_OR_BURNER, 1);
     }
 
@@ -115,7 +114,7 @@ contract SampleERC721TTest is Test {
         emit Transfer(address(0), MINTER_OR_BURNER, 0);
         emit Transfer(address(0), MINTER_OR_BURNER, 1);
         emit Transfer(address(0), MINTER_OR_BURNER, 2);
-        emit BatchTierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.batchMintTier(MINTER_OR_BURNER, 1, 3);
     }
 
@@ -126,7 +125,7 @@ contract SampleERC721TTest is Test {
         emit Transfer(address(0), MINTER_OR_BURNER, 0);
         emit Transfer(address(0), MINTER_OR_BURNER, 1);
         emit Transfer(address(0), MINTER_OR_BURNER, 2);
-        emit BatchTierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(0, 3, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.batchSafeMintTier(MINTER_OR_BURNER, 1, 3);
     }
 
@@ -143,9 +142,9 @@ contract SampleERC721TTest is Test {
         emit Transfer(address(0), AIRDROP_RECIPIENT_INDEX_ZERO, 0);
         emit Transfer(address(0), AIRDROP_RECIPIENT_INDEX_ONE, 1);
         emit Transfer(address(0), AIRDROP_RECIPIENT_INDEX_TWO, 2);
-        emit TierSet(0, 1, CURRENT_BLOCKTIMESTAMP);
-        emit TierSet(1, 1, CURRENT_BLOCKTIMESTAMP);
-        emit TierSet(2, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(0, 1, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(1, 1, 1, CURRENT_BLOCKTIMESTAMP);
+        emit TierSet(2, 1, 1, CURRENT_BLOCKTIMESTAMP);
         sampleERC721T.airdropTier(recipients, 1);
     }
 
