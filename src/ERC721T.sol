@@ -123,7 +123,7 @@ abstract contract ERC721T is ERC721 {
     }
 
     /// @dev Returns the total burned of tokens in circulation.
-    function totalBurned() internal view returns (uint256) {
+    function totalBurned() public view returns (uint256) {
         return _burnCounter;
     }
 
