@@ -73,6 +73,34 @@ contract SampleERC721TTest is Test {
         assertEq(sampleERC721T.mintTimestamp(0), 0);
     }
 
+    function test_TotalMinted_AfterSingleTokenMinted() public {
+        assertEq(sampleERC721T.totalMinted(), 0); // Before mint
+        _mintTierSingleToken();
+        assertEq(sampleERC721T.totalMinted(), 1); // After mint
+    }
+
+    function test_TotalMinted_AfterSingleTokenBurned() public {
+        _mintTierSingleToken();
+        assertEq(sampleERC721T.totalMinted(), 1); // Before burn
+        vm.prank(MINTER_OR_BURNER);
+        sampleERC721T.burnTierBy(MINTER_OR_BURNER, 0);
+        assertEq(sampleERC721T.totalMinted(), 1); // After burn
+    }
+
+    function test_TotalBurned_AfterSingleTokenMinted() public {
+        assertEq(sampleERC721T.totalBurned(), 0); // Before mint
+        _mintTierSingleToken();
+        assertEq(sampleERC721T.totalBurned(), 0); // After mint
+    }
+
+    function test_TotalBurned_AfterSingleTokenBurned() public {
+        _mintTierSingleToken();
+        assertEq(sampleERC721T.totalBurned(), 0); // Before burn
+        vm.prank(MINTER_OR_BURNER);
+        sampleERC721T.burnTierBy(MINTER_OR_BURNER, 0);
+        assertEq(sampleERC721T.totalBurned(), 1); // After burn
+    }
+
     function test_TotalSupply_AfterSingleTokenMinted() public {
         assertEq(sampleERC721T.totalSupply(), 0); // Before mint
         _mintTierSingleToken();
