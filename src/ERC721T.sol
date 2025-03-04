@@ -115,6 +115,18 @@ abstract contract ERC721T is ERC721 {
         return uint40(_getExtraData(tokenId) >> _BITPOS_TIER_ID);
     }
 
+    /// @dev Returns the total minted of tokens in circulation.
+    function totalMinted() public view returns (uint256) {
+        unchecked {
+            return _currentIndex - _startTokenId();
+        }
+    }
+
+    /// @dev Returns the total burned of tokens in circulation.
+    function totalBurned() internal view returns (uint256) {
+        return _burnCounter;
+    }
+
     /// @dev Returns the total supply of tokens in circulation.
     function totalSupply() public view returns (uint256) {
         unchecked {
@@ -232,11 +244,6 @@ abstract contract ERC721T is ERC721 {
     /// @dev Returns the next token ID to be minted.
     function _nextTokenId() internal view returns (uint256) {
         return _currentIndex;
-    }
-
-    /// @dev Returns the total number of burned tokens.
-    function _totalBurned() internal view returns (uint256) {
-        return _burnCounter;
     }
 
     /// @dev @dev Base tier URI for computing {tokenURI}.
