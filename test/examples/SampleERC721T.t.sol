@@ -8,7 +8,6 @@ contract SampleERC721TTest is Test {
     SampleERC721T sampleERC721T;
 
     uint256 constant CURRENT_BLOCKTIMESTAMP = 1737667200; // January 23, 2025, 9:20 PM UTC
-    uint56 constant MAX_TIER_ID = 0xFFFFFFFFFFFFFF; // 72057594037927935
 
     address constant MINTER_OR_BURNER = 0xcfd86e16635486b2eCAf674A98F24ed12a15c3b4;
     address constant BAD_ACTOR = 0xac912225f59d840c700cc9F04CD5Ade96Bd009BF;
@@ -185,7 +184,7 @@ contract SampleERC721TTest is Test {
     function test_RevertWhen_MintTier_TierIdExceedsMaxUint56Value() public {
         vm.prank(MINTER_OR_BURNER);
         vm.expectRevert(); // panic: arithmetic underflow or overflow (0x11)
-        sampleERC721T.mintTier(MINTER_OR_BURNER, MAX_TIER_ID + 1);
+        sampleERC721T.mintTier(MINTER_OR_BURNER, type(uint56).max + 1);
     }
 
     function test_RevertWhen_AirdropTier_ByNonContractOwner() public {
