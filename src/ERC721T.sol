@@ -34,7 +34,7 @@ abstract contract ERC721T is ERC721 {
     string private _symbol;
 
     /*//////////////////////////////////////////////////////////////
-                            CUSTOM EVENT
+                            CUSTOM EVENTS
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Emitted when from token with quantity is set to a tier.
