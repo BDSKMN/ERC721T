@@ -61,7 +61,7 @@ abstract contract ERC721T is ERC721 {
 
     /// @dev Ensures the tier ID is not zero.
     modifier TierIsNotZero(uint56 tier) {
-        _requireTierIdIsNotZero(tier);
+        _requireTierIsNotZero(tier);
         _;
     }
 
@@ -258,7 +258,7 @@ abstract contract ERC721T is ERC721 {
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Reverts if the tier ID is zero.
-    function _requireTierIdIsNotZero(uint56 tier) internal pure {
+    function _requireTierIsNotZero(uint56 tier) internal pure {
         if (tier == 0) _rv(uint32(TierCanNotBeZero.selector));
     }
 
