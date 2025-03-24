@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import {ERC721} from "solady/tokens/ERC721.sol";
 
 /// @title ERC721-T
-/// @author 0xkuwabatake (@0xkuwabatake)
+/// @author BDSKMN (@BDSKMN)
 /// @notice Abstract ERC721 contract with tier-based structure and sequential minting, 
 ///         using extra data packing for efficiency.
 /// @dev    Extends Solady's ERC721 and modifies it to support sequential minting 
